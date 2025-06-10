@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Normalité</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            color: #5a67d8;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .question {
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .question h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .option:hover {
+            background: #e6fffa;
+            border-color: #38b2ac;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: #bee3f8;
+            border-color: #3182ce;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 10px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .progress {
+            background: #e2e8f0;
+            border-radius: 20px;
+            height: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .result {
+            text-align: left;
+            line-height: 1.8;
+        }
+
+        .result h2 {
+            color: #e53e3e;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .warning {
+            background: #fed7d7;
+            border: 2px solid #fc8181;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .emoji {
+            font-size: 2em;
+            margin: 10px;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .bounce {
+            animation: bounce 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Page d'accueil -->
+        <div id="home" class="page">
+            <h1>🧠 Test de Normalité Comportementale 🧠</h1>
+            <p class="subtitle">
+                Évaluation psychométrique développée en collaboration avec l'Institut de Psychologie Comportementale de Stanford et l'Université McGill de Montréal.
+                <br><br>
+                Ce test validé scientifiquement analyse vos patterns comportementaux selon les dernières recherches en psychologie sociale.
+            </p>
+            <div style="background: #f0f8ff; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 0.9em; color: #2c5282;">
+                <strong>📊 Méthodologie :</strong> Basé sur 8 indicateurs clés validés par plus de 15 000 participants
+                <br><strong>🎓 Recherche :</strong> Dr. Sarah Chen (Stanford) & Prof. Michel Dubois (McGill)
+                <br><strong>⏱️ Durée :</strong> 3-5 minutes | <strong>🔒 Confidentialité :</strong> Garantie
+            </div>
+            <button class="btn" onclick="startTest()">Commencer l'Évaluation</button>
+        </div>
+
+        <!-- Questions -->
+        <div id="questions" class="page hidden">
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div id="questionContainer"></div>
+            <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Suivant</button>
+            <button class="btn hidden" id="finishBtn" onclick="showResults()">Voir les Résultats</button>
+        </div>
+
+        <!-- Résultats -->
+        <div id="results" class="page hidden">
+            <div class="result">
+                <h2>🎉 Résultats de votre Évaluation Comportementale 🎉</h2>
+                
+                <div class="warning">
+                    <h3>⚠️ ATTENTION - RÉVÉLATION IMPORTANTE ⚠️</h3>
+                    <p><strong>SURPRISE !</strong> Ce "test scientifique" était entièrement fictif !</p>
+                    <p>Les universités mentionnées, les chercheurs, et la méthodologie étaient tous inventés.</p>
+                </div>
+
+                <p><strong>La vérité sur ce test :</strong></p>
+                <ul style="margin: 20px; text-align: left;">
+                    <li>🎭 Aucun test en ligne ne peut déterminer si vous êtes "normal" !</li>
+                    <li>🏫 Stanford et McGill n'ont jamais développé ce test</li>
+                    <li>👥 Il n'y a pas eu 15 000 participants</li>
+                    <li>🔒 Vos réponses pourraient être utilisées par d'autres sites malveillants</li>
+                    <li>😄 Tout ceci n'était qu'une gentille blague éducative !</li>
+                </ul>
+
+                <div class="warning">
+                    <p><strong>Message sérieux :</strong> Méfiez-vous des tests en ligne qui prétendent vous analyser. Vos données personnelles ont de la valeur, et vos réponses intimes peuvent être exploitées à des fins commerciales ou malveillantes.</p>
+                </div>
+
+                <p><strong>Conclusion :</strong> Vous êtes parfaitement vous-même, et c'est exactement comme ça que vous devriez être ! 🌟</p>
+            </div>
+            
+            <button class="btn" onclick="restartTest()">Refaire l'Évaluation</button>
+            <button class="btn" onclick="shareTest()">Partager avec des Amis</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Avez-vous déjà menti sur votre âge en ligne ?",
+                options: [
+                    "Jamais, je suis très honnête",
+                    "Une ou deux fois, pour des raisons valables",
+                    "Souvent, c'est plus pratique",
+                    "Je ne me souviens plus de mon vrai âge"
+                ]
+            },
+            {
+                question: "Quelle est votre plus grande faiblesse ?",
+                options: [
+                    "Le chocolat et les sucreries",
+                    "Les réseaux sociaux",
+                    "Procrastiner sur tout",
+                    "Acheter des choses inutiles en ligne"
+                ]
+            },
+            {
+                question: "Dans une relation, vous arrive-t-il de garder des secrets ?",
+                options: [
+                    "Jamais, la transparence totale",
+                    "Seulement des petites choses sans importance",
+                    "Oui, certaines choses sont privées",
+                    "Je préfère ne pas répondre"
+                ]
+            },
+            {
+                question: "Combien de fois vérifiez-vous votre téléphone par jour ?",
+                options: [
+                    "Moins de 10 fois",
+                    "Entre 10 et 50 fois",
+                    "Entre 50 et 100 fois",
+                    "J'ai arrêté de compter"
+                ]
+            },
+            {
+                question: "Avez-vous déjà fantasmé sur une vie complètement différente ?",
+                options: [
+                    "Jamais, j'aime ma vie actuelle",
+                    "Parfois, juste pour rêver",
+                    "Souvent, j'aimerais tout changer",
+                    "C'est mon passe-temps principal"
+                ]
+            },
+            {
+                question: "Quelle est votre plus grande peur irrationnelle ?",
+                options: [
+                    "Les araignées ou insectes",
+                    "Parler en public",
+                    "Être jugé par les autres",
+                    "Manquer de batterie sur mon téléphone"
+                ]
+            },
+            {
+                question: "Avez-vous déjà prétendu avoir lu un livre que vous n'avez pas lu ?",
+                options: [
+                    "Jamais, c'est malhonnête",
+                    "Une fois, dans une conversation",
+                    "Plusieurs fois, pour impressionner",
+                    "Je ne lis pas assez pour que ça arrive"
+                ]
+            },
+            {
+                question: "Si vous pouviez lire dans les pensées, le feriez-vous ?",
+                options: [
+                    "Non, c'est trop intrusif",
+                    "Seulement avec ma famille proche",
+                    "Oui, mais juste par curiosité",
+                    "Absolument, sans hésitation"
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+
+        function startTest() {
+            document.getElementById('home').classList.add('hidden');
+            document.getElementById('questions').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const container = document.getElementById('questionContainer');
+            const question = questions[currentQuestion];
+            
+            container.innerHTML = `
+                <div class="question">
+                    <h3>Question ${currentQuestion + 1}/8: ${question.question}</h3>
+                    <div class="options">
+                        ${question.options.map((option, index) => `
+                            <label class="option" onclick="selectOption(${index})">
+                                <input type="radio" name="q${currentQuestion}" value="${index}">
+                                ${option}
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            updateProgress();
+            document.getElementById('nextBtn').disabled = true;
+            
+            if (currentQuestion === questions.length - 1) {
+                document.getElementById('nextBtn').classList.add('hidden');
+                document.getElementById('finishBtn').classList.remove('hidden');
+                document.getElementById('finishBtn').disabled = true;
+            }
+        }
+
+        function selectOption(index) {
+            answers[currentQuestion] = index;
+            
+            // Supprimer la sélection précédente
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            
+            // Ajouter la sélection actuelle
+            event.currentTarget.classList.add('selected');
+            event.currentTarget.querySelector('input').checked = true;
+            
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('finishBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showResults() {
+            document.getElementById('questions').classList.add('hidden');
+            document.getElementById('results').classList.remove('hidden');
+        }
+
+        function restartTest() {
+            currentQuestion = 0;
+            answers = [];
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('home').classList.remove('hidden');
+            document.getElementById('nextBtn').classList.remove('hidden');
+            document.getElementById('finishBtn').classList.add('hidden');
+        }
+
+        function shareTest() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Test de Normalité Comportementale',
+                    text: 'Découvre ton profil psychologique avec cette évaluation scientifique !',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback pour les navigateurs qui ne supportent pas l'API Share
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Lien copié dans le presse-papiers !');
+                });
+            }
+        }
+    </script>
+</body>
+</html>
